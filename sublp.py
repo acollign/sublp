@@ -16,17 +16,30 @@
 from sys import argv
 from os import path
 from os import getcwd
+import argparse
 
 PROJECT_FILECONTENT_TEMPLATE = '{"folders":[{"path": "%p"}]}\n'
 PROJET_FILENAME_TEMPLATE = "{0}.sublime-project"
 
+# args handling
+parser = argparse.ArgumentParser()
+parser.add_argument("folder", help="the project folder")
+parser.add_argument("-f", "--filename", 
+	type=str, help="the sublime text project file name",action="store")
+args = parser.parse_args()
+
 projectRootPath = getcwd()
 
-if len(argv) > 1:
-	projectRootPath = path.abspath(argv[1])
+if args.folder:
+	projectRootPath = path.abspath(args.folder)
 
-projectName = path.basename(projectRootPath)
-projectFileName = PROJET_FILENAME_TEMPLATE.format(projectName)
+projectFileName = None
+if args.filename:
+	projectName = args.filename
+	projectFileName = PROJET_FILENAME_TEMPLATE.format(args.filename)
+else:
+	projectName = path.basename(projectRootPath)
+	projectFileName = PROJET_FILENAME_TEMPLATE.format(projectName)
 
 projectFile = None
 try:
