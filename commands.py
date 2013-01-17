@@ -32,9 +32,8 @@ class BaseCommand(object):
 		parser = argparse.ArgumentParser(prog="{0} {1}".format(progname, self.name))
 		BaseCommand.add_common_args(parser)
 		parser.add_argument("-p", "--project", type=str, help="the sublime text project file name")
-
+		parser.add_argument("--force", action="store_true", help="override the project file if it exists")
 		self.args = parser.parse_args(args)
-		print self.args
 
 	@classmethod
 	def add_common_args(self, parser):
@@ -64,17 +63,20 @@ class InitCommand(BaseCommand):
 
 		projectFile = None
 		try:
+			if not self.args.force and path.exists(projectFileName):
+				print "{0} already exists, use --force to override the project file.".format(projectFileName)
+				return
+
 			projectFile = open(projectFileName, "w")	
 			content = PROJECT_FILECONTENT_TEMPLATE.replace("%p", projectRootPath)
 			projectFile.write(content)
 
+			print "{0} project has been created.".format(projectName)
 		except Exception, e:
 			print "Failed to create the project due to {0}.".format(e)
 
 		finally:
 			if projectFile :
 				projectFile.close()
-
-			print "{0} project has been created.".format(projectName)
 
 registry = {'init' : InitCommand()}
