@@ -13,45 +13,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from sys import argv
-from os import path
-from os import getcwd
 import argparse
+import commands
 
-PROJECT_FILECONTENT_TEMPLATE = '{"folders":[{"path": "%p"}]}\n'
-PROJET_FILENAME_TEMPLATE = "{0}.sublime-project"
+PROGNAME = "sublp"
 
-# args handling
+# args handling (command and common args)
 parser = argparse.ArgumentParser()
-parser.add_argument("folder", help="the project folder")
-parser.add_argument("-f", "--filename", 
-	type=str, help="the sublime text project file name",action="store")
+commands.BaseCommand.add_common_args(parser)
+parser.add_argument("command", choices=commands.registry.keys(), nargs=argparse.REMAINDER, help="the command to run")
+
 args = parser.parse_args()
 
-projectRootPath = getcwd()
+command_name = args.command[0]
+command_args = args.command[1:]
 
-if args.folder:
-	projectRootPath = path.abspath(args.folder)
+ctx = {"args":command_args, "progname":PROGNAME}
 
-projectFileName = None
-if args.filename:
-	projectName = args.filename
-	projectFileName = PROJET_FILENAME_TEMPLATE.format(args.filename)
-else:
-	projectName = path.basename(projectRootPath)
-	projectFileName = PROJET_FILENAME_TEMPLATE.format(projectName)
-
-projectFile = None
-try:
-	projectFile = open(projectFileName, "w")	
-	content = PROJECT_FILECONTENT_TEMPLATE.replace("%p", projectRootPath)
-	projectFile.write(content)
-
-except Exception, e:
-	print "Failed to create the project due to {0}.".format(e)
-
-finally:
-	if projectFile :
-		projectFile.close()
-
-	print "{0} project has been created.".format(projectName)
+commands.registry[command_name].run(ctx)
