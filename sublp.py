@@ -25,6 +25,10 @@ parser.add_argument("command", choices=commands.registry.keys(), nargs=argparse.
 
 args = parser.parse_args()
 
+if not args.command:
+	parser.print_help()
+	exit(1)
+
 command_name = args.command[0]
 command_args = args.command[1:]
 
